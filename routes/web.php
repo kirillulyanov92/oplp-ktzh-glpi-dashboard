@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\ShiftCommentController;
 use App\Models\Shift;
+use App\Http\Controllers\NagiosController;
 use App\Http\Controllers\TicketController;
 
 
@@ -39,5 +40,9 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/tickets', [\App\Http\Controllers\TicketController::class, 'index'])->name('tickets.index');
 });
+
+Route::get('/nagios', [NagiosController::class, 'index']);
+Route::get('/nagios/hostlist', [NagiosController::class, 'getHostList']);
+
 
 require __DIR__.'/auth.php';
