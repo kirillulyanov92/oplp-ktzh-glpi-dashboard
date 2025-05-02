@@ -34,15 +34,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
-// Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
-
 Route::middleware(['auth'])->group(function () {
     Route::get('/tickets', [\App\Http\Controllers\TicketController::class, 'index'])->name('tickets.index');
 });
 
-Route::get('/nagios', [NagiosController::class, 'index']);
-Route::get('/nagios/hostlist', [NagiosController::class, 'getHostList']);
-
+Route::middleware(['auth'])->group(function() {
+    Route::get('/nagios', [NagiosController::class, 'index']);
+    Route::get('/nagios/hostlist', [NagiosController::class, 'getHostList']);
+});
 
 require __DIR__.'/auth.php';
