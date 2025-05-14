@@ -100,7 +100,7 @@ const data = [
   ],
 ]
 
-export function NavActions() {
+export function NavActions({ children }) {
   const [isOpen, setIsOpen] = React.useState(false)
   const { theme, toggleTheme } = useTheme();
   
@@ -110,14 +110,15 @@ export function NavActions() {
   // }, [])
 
   return (
-    <div className="flex items-center gap-2 text-sm">
-      <div className="hidden font-medium text-muted-foreground md:inline-block">
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      {/* <div className="hidden font-medium text-muted-foreground md:inline-block">
         Изменить Тему
-      </div>
-      <Button onClick={toggleTheme} className="self-start h-7 w-7" variant="ghost" size="icon">
-        {theme === "dark" ? <Moon /> : <Sun />}
+      </div> */}
+      <Button onClick={toggleTheme} variant="ghost" size="icon">
+        {theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
       </Button>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      {children}
+      {/* <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
@@ -151,7 +152,7 @@ export function NavActions() {
             </SidebarContent>
           </Sidebar>
         </PopoverContent>
-      </Popover>
+      </Popover> */}
     </div>
   )
 }

@@ -9,50 +9,23 @@ class NagiosController extends Controller
 {
     public function index()
     {
-        $response = Http::withBasicAuth(
-            env('NAGIOS_USER'),
-            env('NAGIOS_PASS')
-        )->get(env('NAGIOS_STATUS_URL'), [
-            'query' => 'hostlist',
-        ]);
-
-        $hostlist = $response->json()['data']['hostlist'] ?? [];
-
+        $hostlist = $this->fetchNagiosHostList();
+        
         return \Inertia\Inertia::render('Nagios/HostList', [
             'hosts' => $hostlist,
         ]);
     }
 
-    public function getHostList()
-    {
-        $response = Http::withBasicAuth(
-            env('NAGIOS_USER'),
-            env('NAGIOS_PASS')
-        )->get(env('NAGIOS_STATUS_URL'), [
-            'query' => 'hostlist',
-        ]);
-
-        $hostlist = $response->json()['data']['hostlist'] ?? [];
-
-        return \Inertia\Inertia::render('Nagios/HostList', [
-            'hosts' => $hostlist,
-        ]);
-    }
-
-
+    
     public function disableHostCheck(Request $request)
     {
         $host = $request->input('host');
-
-        $response = Http::withBasicAuth(
-            env('NAGIOS_USER'),
-            env('NAGIOS_PASS')
-        )->asForm()->post(env('NAGIOS_URL'), [
-            'cmd_typ' => 7, // DISABLE_HOST_CHECK
+        
+        $response = $this->executeNagiosCommand(7, [
             'host' => $host,
             'btnSubmit' => 'Commit',
         ]);
-
+        
         return response()->json([
             'status' => 'ok',
             'message' => "Host check disabled for $host",
@@ -60,49 +33,50 @@ class NagiosController extends Controller
         ]);
     }
 
-    public function enableHostCheck(Request $request)
+    /**
+     * Базовый метод для создания аутентифицированного запроса к Nagios
+     * 
+     * @return \Illuminate\Http\Client\PendingRequest
+     */
+    private function createNagiosRequest()
     {
-        $host = $request->input('host');
-
-        $response = Http::withBasicAuth(
+        return Http::withBasicAuth(
             env('NAGIOS_USER'),
             env('NAGIOS_PASS')
-        )->asForm()->post(env('NAGIOS_URL'), [
-            'cmd_typ' => 8, // ENABLE_HOST_CHECK
-            'host' => $host,
-            'btnSubmit' => 'Commit',
-        ]);
-
-        return response()->json([
-            'status' => 'ok',
-            'message' => "Host check enabled for $host",
-            'nagios_response_code' => $response->status()
-        ]);
+        );
     }
-
-    public function scheduleDowntime(Request $request)
+    
+    /**
+     * Получить список хостов из API Nagios
+     * 
+     * @return array
+     */
+    private function fetchNagiosHostList()
     {
-        $host = $request->input('host');
-        $start = time();
-        $end = $start + 3600; // на час
+        $response = $this->createNagiosRequest()
+            ->get(env('NAGIOS_STATUS_URL'), [
+                'query' => 'hostlist',
+            ]);
 
-        $response = Http::withBasicAuth(
-            env('NAGIOS_USER'),
-            env('NAGIOS_PASS')
-        )->asForm()->post(env('NAGIOS_URL'), [
-            'cmd_typ' => 55, // SCHEDULE_HOST_DOWNTIME
-            'host' => $host,
-            'com_data' => 'Scheduled from Laravel API',
-            'start_time' => date('m-d-Y H:i:s', $start),
-            'end_time' => date('m-d-Y H:i:s', $end),
-            'btnSubmit' => 'Commit',
-        ]);
-
-        return response()->json([
-            'status' => 'ok',
-            'message' => "Downtime scheduled for $host",
-            'nagios_response_code' => $response->status()
-        ]);
+        return $response->json()['data']['hostlist'] ?? [];
+    }
+    
+    /**
+     * Выполнить команду в Nagios
+     * 
+     * @param int $commandType Тип команды Nagios (например, 7 для DISABLE_HOST_CHECK)
+     * @param array $params Дополнительные параметры команды
+     * @return \Illuminate\Http\Client\Response
+     */
+    private function executeNagiosCommand(int $commandType, array $params = [])
+    {
+        return $this->createNagiosRequest()
+            ->asForm()
+            ->post(env('NAGIOS_URL'), array_merge(
+                ['cmd_typ' => $commandType],
+                $params
+            ));
     }
 }
+
 

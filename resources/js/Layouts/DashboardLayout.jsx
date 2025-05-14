@@ -26,7 +26,7 @@ import {
 import { TicketSheet } from "@/components/ticket-sheet";
 
 
-export default function DashboardLayout({ children, title = "Панель", sidebar = "default", tickets = [] }) {
+export default function DashboardLayout({ children, title = "Панель", sidebar = "default" }) {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const isTicketsLayout = sidebar === "tickets";
 
@@ -42,7 +42,7 @@ export default function DashboardLayout({ children, title = "Панель", side
       </SidebarProvider>
 
       {isTicketsLayout && (
-      <TicketSheet open={isSheetOpen} onOpenChange={setIsSheetOpen} tickets={tickets} />
+        <TicketSheet open={isSheetOpen} onOpenChange={setIsSheetOpen} />
       )}
     </>
   );
@@ -68,10 +68,11 @@ function SidebarContent({ title, children, onOpenRight }) {
           </Breadcrumb>
         </div>
         <div className="ml-auto px-3">
-          <NavActions />
+          <NavActions>
           {title === "Заявки" && (
             <SidebarRightTrigger onClick={onOpenRight} />
           )}
+          </NavActions>
         </div>
       </header>
 

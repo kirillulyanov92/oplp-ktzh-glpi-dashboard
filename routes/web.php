@@ -35,12 +35,14 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/tickets', [\App\Http\Controllers\TicketController::class, 'index'])->name('tickets.index');
+    // Route::get('/tickets', [\App\Http\Controllers\TicketController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/fetch', [TicketController::class, 'fetch']);
 });
 
 Route::middleware(['auth'])->group(function() {
     Route::get('/nagios', [NagiosController::class, 'index']);
     Route::get('/nagios/hostlist', [NagiosController::class, 'getHostList']);
 });
+
 
 require __DIR__.'/auth.php';

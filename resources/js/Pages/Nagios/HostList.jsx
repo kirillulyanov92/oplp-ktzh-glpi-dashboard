@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
 
 export default function HostList({ hosts }) {
   const [loadingHost, setLoadingHost] = useState(null);
@@ -16,6 +17,8 @@ export default function HostList({ hosts }) {
   const hostEntries = Object.entries(hosts);
 
   return (
+    <DashboardLayout title="Заявки" sidebar="tickets">
+
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Nagios Host List</h1>
       <table className="w-full table-auto border border-gray-300">
@@ -57,5 +60,6 @@ export default function HostList({ hosts }) {
         </tbody>
       </table>
     </div>
+    </DashboardLayout>
   );
 }

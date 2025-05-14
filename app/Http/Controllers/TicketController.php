@@ -61,4 +61,47 @@ class TicketController extends Controller
         }
     }
 
+    public function fetch()
+    {
+        try {
+            $criteria = [
+                [
+                    'field' => 8,
+                    'searchtype' => 'equals',
+                    'value' => 'mygroups',
+                    'link' => 'AND'
+                ],
+                [
+                    'link' => 'AND',
+                    'criteria' => [
+                        [
+                            'field' => 12,
+                            'searchtype' => 'equals',
+                            'value' => '1',
+                            'link' => 'AND'
+                        ],
+                        [
+                            'field' => 12,
+                            'searchtype' => 'equals',
+                            'value' => 'process',
+                            'link' => 'OR'
+                        ]
+                    ]
+                ]
+            ];
+
+            $tickets = $this->glpiService->searchTickets($criteria);
+
+            return response()->json([
+                'tickets' => $tickets['data'] ?? [],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'tickets' => [],
+                'error' => 'Ошибка при получении тикетов',
+            ], 500);
+        }
+    }
+
+
 }
