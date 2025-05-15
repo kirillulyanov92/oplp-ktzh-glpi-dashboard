@@ -92,6 +92,8 @@ class TicketController extends Controller
 
             $tickets = $this->glpiService->searchTickets($criteria);
 
+            // dd($tickets);
+
             return response()->json([
                 'tickets' => $tickets['data'] ?? [],
             ]);
