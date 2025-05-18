@@ -105,5 +105,23 @@ class TicketController extends Controller
         }
     }
 
+    public function close(int $id)
+{
+    try {
+        $result = $this->glpiService->closeTicket($id);
+
+        return response()->json([
+            'success' => $result,
+            'message' => $result ? 'Тикет закрыт' : 'Ошибка при закрытии тикета',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Ошибка: ' . $e->getMessage(),
+        ], 500);
+    }
+}
+
+
 
 }

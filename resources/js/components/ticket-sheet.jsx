@@ -1,6 +1,7 @@
 'use client';
 
 import { useTicketsPolling } from "@/hooks/useTicketsPolling";
+import { useState } from "react"; // Добавляем импорт useState для обработки состояния
 
 import {
   Sheet,
@@ -8,9 +9,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import { BellOff } from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import axios from "axios"; // Добавляем axios для выполнения запросов
 
 export function decodeHtmlAndParse(encodedHtml) {
   const textarea = document.createElement("textarea");
@@ -43,10 +46,43 @@ export function decodeHtmlAndParse(encodedHtml) {
   return parsedBlocks;
 }
 
-
-
 export function TicketSheet({ open, onOpenChange, }) {
-  const { tickets, loading } = useTicketsPolling(60000); // 60 сек
+  const { tickets, loading, error, setTickets } = useTicketsPolling(60000); // 60 сек
+  const [processingIds, setProcessingIds] = useState([]); // Состояние для отслеживания процесса закрытия
+  
+  const handleClose = async (ticketId) => {
+    // Добавляем ID в список обрабатываемых
+    setProcessingIds(prev => [...prev, ticketId]);
+    
+    try {
+      // Получаем CSRF-токен из мета-тега
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      
+      const res = await axios.patch(`/tickets/${ticketId}/close`, {}, {
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        }
+      });
+      console.log('Закрытие тикета с ID:', ticketId);
+
+
+      if (res.data.success) {
+        // Обновляем список тикетов, удаляя закрытый
+        setTickets(prev => prev.filter(ticket => ticket[2] !== ticketId));
+        alert('Тикет закрыт');
+      } else {
+        alert(res.data.message || 'Ошибка при закрытии тикета');
+      }
+    } catch (error) {
+      console.error('Ошибка при закрытии тикета:', error);
+      alert('Ошибка при закрытии тикета');
+    } finally {
+      // Убираем ID из списка обрабатываемых
+      setProcessingIds(prev => prev.filter(id => id !== ticketId));
+    }
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -92,6 +128,17 @@ export function TicketSheet({ open, onOpenChange, }) {
                 </div>
                 ))}
                 </CardContent>
+                <div className="p-4 pt-0">
+                  <Button 
+                    onClick={() => handleClose(ticket[2])}
+                    disabled={processingIds.includes(ticket[2])}
+                    variant="destructive"
+                    size="sm"
+                    className="w-full"
+                  >
+                    {processingIds.includes(ticket[2]) ? 'Закрытие...' : 'Закрыть заявку'}
+                  </Button>
+                </div>
               </Card>
             ))}
           </div>

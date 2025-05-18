@@ -33,5 +33,5 @@ export function useTicketsPolling(interval = 10000) {
     };
   }, [interval]);
 
-  return { tickets, loading, error };
+  return { tickets, loading, error, setTickets }; // Экспортируем setTickets для возможности обновления списка
 }

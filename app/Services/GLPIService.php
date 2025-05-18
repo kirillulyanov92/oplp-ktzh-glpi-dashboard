@@ -135,4 +135,65 @@ class GLPIService
         return $response->json();
     }
 
+    /**
+     * Закрытие тикета в GLPI
+     * 
+     * @param int $id ID тикета для закрытия
+     * @return bool Результат операции
+     */
+    public function closeTicket(int $id)
+    {
+        try {
+            // Проверяем сессию и инициализируем при необходимости
+            if (empty($this->sessionToken)) {
+                $this->initSession();
+            }
+            
+            // Отправляем запрос на закрытие тикета
+            // $response = Http::withHeaders([
+            //     'Content-Type' => 'application/json',
+            //     'Session-Token' => $this->sessionToken,
+            //     'App-Token' => $this->appToken,
+            // ])
+            // ->withOptions([
+            //     'proxy' => $this->appProxy,
+            //     'verify' => false,
+            // ])
+            // ->put($this->apiUrl . "/Ticket/$id", [
+            //     'status' => 6, // Статус "Закрыт" в GLPI
+            //     'closedate' => date('Y-m-d H:i:s'),
+            // ]);
+            $response = $this->http()
+            ->withHeaders($this->sessionHeaders())
+            ->put("{$this->apiUrl}/Ticket/$id", [
+                'input' => [
+                    'status' => 6,
+                    'closedate' => date('Y-m-d H:i:s'),
+                    'solution' => 'Заявка закрыта через API приложения', // Текст решения
+                ]
+            ]);
+        
+        
+        
+
+            if ($response->successful()) {
+                return true;
+            } else {
+                Log::error('Failed to close GLPI ticket', [
+                    'ticket_id' => $id,
+                    'response' => $response->body(),
+                    'status' => $response->status(),
+                ]);
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error('GLPI close ticket error', [
+                'ticket_id' => $id, 
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+
 }

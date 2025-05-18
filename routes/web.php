@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->group(function () {
     // Route::get('/tickets', [\App\Http\Controllers\TicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/fetch', [TicketController::class, 'fetch']);
+    Route::patch('/tickets/{id}/close', [TicketController::class, 'close'])->name('tickets.close');
 });
 
 Route::middleware(['auth'])->group(function() {
